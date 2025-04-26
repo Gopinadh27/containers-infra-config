@@ -74,7 +74,5 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
       - "8888:8080"
-    networks:
-      - internal
     volumes:
       - keycloak_data:/opt/keycloak/data
