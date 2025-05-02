@@ -1,0 +1,46 @@
+⚙️ Step 2: Install Kubernetes (kubeadm, kubelet, kubectl) on All Nodes
+
+sudo apt-get update
+sudo apt-get install -y apt-transport-https curl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+deb http://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+
+
+🧠 Step 3: Initialize Kubernetes on the Master Node
+
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+🌐 Step 4: Install Network Plugin (e.g., Calico or Flannel)
+
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml
+Ensure the pod network CIDR used in kubeadm init matches the plugin (e.g., 192.168.0.0/16 for Calico).
+
+🤝 Step 5: Join Worker Nodes
+On each worker node, run the join command from the master’s kubeadm init output. Example:
+
+sudo kubeadm join <MASTER_IP>:6443 --token <TOKEN> --discovery-token-ca-cert-hash sha256:<HASH>
+
+kubeadm token create --print-join-command
+
+✅ Step 6: Verify Cluster
+On the master node:
+
+
+kubectl get nodes
+kubectl get pods -A
+
+📦 Optional: Enable kubectl autocompletion
+bash
+Copy
+Edit
+echo "source <(kubectl completion bash)" >> ~/.bashrc
